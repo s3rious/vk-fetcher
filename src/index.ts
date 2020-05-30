@@ -1,4 +1,5 @@
 import {Command, flags} from '@oclif/command'
+import { getVkApiInstance } from "./getVkApiInstance";
 
 class VkFetcher extends Command {
   static description = 'Fetches and saves to disk all of the vk group documents'
@@ -30,7 +31,7 @@ class VkFetcher extends Command {
       this.error('No group specified', {exit: 2})
     }
 
-    this.log(JSON.stringify(flags, null, 2))
+    const apiInstance = getVkApiInstance(flags.token)
   }
 }
 
