@@ -7,45 +7,38 @@
   },
   "bugs": "https://github.com/s3rious/vk-fetcher/issues",
   "dependencies": {
-    "@oclif/command": "^1.6.1",
-    "@oclif/config": "^1.15.1",
-    "@oclif/plugin-help": "^3.0.1",
-    "@types/download": "^6.2.4",
-    "download": "^8.0.0",
     "node-vk-sdk": "^1.1.5",
-    "tslib": "^1.13.0"
+    "download": "^8.0.0"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1.22.2",
+    "@types/download": "^6.2.4",
     "@types/node": "^10.17.24",
+    "@typescript-eslint/eslint-plugin": "^3.0.2",
+    "@typescript-eslint/parser": "^3.0.2",
     "eslint": "^5.16.0",
-    "eslint-config-oclif": "^3.1.0",
-    "eslint-config-oclif-typescript": "^0.1.0",
-    "ts-node": "^8.10.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-unicorn": "^20.1.0",
+    "pkg": "^4.4.8",
     "typescript": "^3.9.3"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=12.0.0"
   },
   "files": [
     "/bin",
     "/lib"
   ],
   "homepage": "https://github.com/s3rious/vk-fetcher",
-  "keywords": [
-    "oclif"
-  ],
   "license": "MIT",
   "main": "lib/index.js",
-  "oclif": {
-    "bin": "vk-fetcher"
+  "pkg": {
+    "scripts": "./lib/**/*.js"
   },
   "repository": "s3rious/vk-fetcher",
   "scripts": {
-    "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
-    "test": "echo NO TESTS",
-    "version": "oclif-dev readme && git add README.md"
+    "test": "eslint src/**/*.ts --fix --config .eslintrc",
+    "dev": "tsc src/index.ts -outDir dist -watch",
+    "build": "tsc src/index.ts -outDir dist && pkg --targets node14-macos,node14-win --output build/vk-fetcher dist/index.js"
   },
   "types": "lib/index.d.ts"
 }

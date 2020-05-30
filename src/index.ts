@@ -1,108 +1,121 @@
 import {cpus} from 'os'
-import {Command, flags} from '@oclif/command'
-import {VKApi} from "node-vk-sdk"
-import {WallWallpostFull} from "node-vk-sdk/distr/src/generated/Models"
+import {WallWallpostFull} from 'node-vk-sdk/distr/src/generated/Models'
 
-import {getVkApiInstance} from "./getVkApiInstance"
-import {resolveScreenName} from "./resolveScreenName"
-import {getWallPostsWithDocuments} from "./getWallPostsWithDocuments"
-import {extractDocumentsFromPosts, DocumentToDownload} from "./extractDocumentsFromPosts"
-import {createFolder} from "./createFolder";
-import {downloadDocuments} from "./downloadDocuments";
+import {getVkApiInstance} from './get-vk-api-instance'
+import {resolveScreenName} from './resolve-screen-name'
+import {getWallPostsWithDocuments} from './get-wall-posts-with-documents'
+import {extractDocumentsFromPosts, DocumentToDownload} from './extract-documents-from-posts'
+import {createFolder} from './create-folder'
+import {downloadDocuments} from './download-documents'
 
-class VkFetcher extends Command {
-  static description = 'Fetches and saves to disk all of the vk group documents'
+type flagsTypes = {
+  token: string;
+  group: string;
+  threads?: number;
+}
 
-  static flags = {
-    help: flags.help({
-      char: 'h'
-    }),
-    // flag with a value (-t, --token=VALUE)
-    token: flags.string({
-      char: 't',
-      description: 'vk api token. Get it here: https://oauth.vk.com/authorize?client_id=3955295&scope=docs,wall,groups&response_type=token'
-    }),
-    // flag with a value (-g, --group=VALUE)
-    group: flags.string({
-      char: 'g',
-      description: 'vk group. e.g.: lavkasnov_ls'
-    }),
-    // flag with a value (-g, --group=VALUE)
-    threads: flags.string({
-      char: 't',
-      description: 'the number of streams with which data will be downloaded from the network, defaults to number of cpu threads',
-      default: String(cpus().length)
-    })
+const log = (message: string): void => {
+  console.log(message)
+}
+
+const error = (message: string | Error, {exit = 1}: {exit?: number}) => {
+  console.error(message)
+  process.exit(exit)
+}
+
+class VkFetcher {
+  flags: flagsTypes
+
+  constructor(flags: flagsTypes) {
+    if (!flags.threads) {
+      flags.threads = cpus().length
+    }
+
+    this.flags = flags
   }
 
   async run() {
-    const {flags} = this.parse(VkFetcher)
-
-    if (!flags.token) {
-      this.error(new Error('No token specified'), {exit: 2})
-    }
-
-    if (!flags.group) {
-      this.error(new Error('No group specified'), {exit: 2})
-    }
-
-    let threads = parseInt(flags.threads)
-    let folder = `./download/${flags.group}`
+    const threads = this.flags.threads || 1
+    const folder = `./download/${this.flags.group}`
     let path
-    let api: VKApi
     let group_id: number
     let posts: Array<WallWallpostFull>
     let documents: Array<DocumentToDownload>
 
-    this.log('Creating VKApi instance...')
-    api = getVkApiInstance(flags.token)
-    this.log('... created!\n')
+    log('Creating VKApi instance...')
+    const api = getVkApiInstance(this.flags.token)
+    log('... created!\n')
 
-    this.log(`Resolving group screen name for "${flags.group}"...`)
+    log(`Resolving group screen name for "${this.flags.group}"...`)
     try {
-      group_id = await resolveScreenName(api, flags.group)
+      group_id = await resolveScreenName(api, this.flags.group)
+    } catch (error_) {
+      error(error_, {exit: 2})
     }
-    catch (error) {
-      this.error(error, {exit: 2})
-    }
-    this.log(`... resolved: ${group_id}!\n`)
+    log(`... resolved: ${group_id}!\n`)
 
-    this.log('Getting list of wall posts with documents...')
+    log('Getting list of wall posts with documents...')
     try {
       posts = await getWallPostsWithDocuments(api, group_id)
+    } catch (error_) {
+      error(error_, {exit: 2})
     }
-    catch (error) {
-      this.error(error, {exit: 2})
-    }
-    this.log(`... got it: ${posts.length}!\n`)
+    log(`... got it: ${posts.length}!\n`)
 
-    this.log('Extracting documents from wall posts...')
+    log('Extracting documents from wall posts...')
     try {
       documents = extractDocumentsFromPosts(posts)
+    } catch (error_) {
+      error(error_, {exit: 2})
     }
-    catch (error) {
-      this.error(error, {exit: 2})
-    }
-    this.log(`... extracted it: ${documents.length}!\n`)
+    log(`... extracted it: ${documents.length}!\n`)
 
-    this.log(`Creating a folder "${folder}" where filed will be downloaded to...`)
+    log(`Creating a folder "${folder}" where filed will be downloaded to...`)
     try {
       path = await createFolder(folder)
+    } catch (error_) {
+      error(error_, {exit: 2})
     }
-    catch (error) {
-      this.error(error, {exit: 2})
-    }
-    this.log(`... done!\n`)
+    log('... done!\n')
 
-    this.log('Downloading documents...')
+    log('Downloading documents...')
     try {
-      await downloadDocuments(documents, path, this.log, threads)
+      await downloadDocuments(documents, path, log, threads)
+    } catch (error_) {
+      error(error_, {exit: 2})
     }
-    catch (error) {
-      this.error(error, {exit: 2})
-    }
-    this.log(`... done!`)
+    log('... done!')
   }
 }
 
-export = VkFetcher
+(async () => {
+  const argv = process.argv
+  const tokenIndex = argv.indexOf('--token')
+  const groupIndex = argv.indexOf('--group')
+  const threadsIndex = argv.indexOf('--threads')
+  const flags: Partial<flagsTypes> = {}
+
+  if (tokenIndex > -1) {
+    flags.token = argv[tokenIndex + 1]
+  }
+
+  if (groupIndex > -1) {
+    flags.group = argv[groupIndex + 1]
+  }
+
+  if (threadsIndex > -1) {
+    flags.threads = Number.parseInt(argv[threadsIndex + 1], 10)
+  }
+
+  if (typeof flags.token === 'undefined') {
+    error(new Error('No token specified'), {exit: 2})
+  }
+
+  if (typeof flags.group === 'undefined') {
+    error(new Error('No group specified'), {exit: 2})
+  }
+
+  const vkFetcher = new VkFetcher(flags as flagsTypes)
+
+  await vkFetcher.run()
+})()

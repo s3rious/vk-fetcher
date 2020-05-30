@@ -1,9 +1,6 @@
 vk-fetcher
 ==========
 
-
-
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/vk-fetcher.svg)](https://npmjs.org/package/vk-fetcher)
 [![Downloads/week](https://img.shields.io/npm/dw/vk-fetcher.svg)](https://npmjs.org/package/vk-fetcher)
 [![License](https://img.shields.io/npm/l/vk-fetcher.svg)](https://github.com/s3rious/vk-fetcher/blob/master/package.json)

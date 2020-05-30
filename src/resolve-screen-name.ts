@@ -1,7 +1,7 @@
-import {VKApi} from "node-vk-sdk";
+import {VKApi} from 'node-vk-sdk'
 
 const resolveScreenName = async (api: VKApi, screen_name: string) => {
-  const response = await api.utilsResolveScreenName({ screen_name })
+  const response = await api.utilsResolveScreenName({screen_name})
 
   if (!response?.object_id) {
     throw new Error(`Screen name is not resolved for "${screen_name}" perhaps group was deleted or something️ 🤷‍♂️`)
@@ -14,4 +14,4 @@ const resolveScreenName = async (api: VKApi, screen_name: string) => {
   return response.object_id
 }
 
-export { resolveScreenName }
+export {resolveScreenName}

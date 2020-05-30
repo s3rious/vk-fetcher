@@ -6,4 +6,4 @@ const getVkApiInstance = (token: string) => new VKApi({
   logger: new ConsoleLogger(),
 })
 
-export { getVkApiInstance }
+export {getVkApiInstance}

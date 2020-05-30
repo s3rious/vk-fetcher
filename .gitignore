@@ -111,3 +111,9 @@ dist
 
 # Donwload folder
 download/
+
+# Lib folder
+lib/
+
+# Build  folder
+build/
