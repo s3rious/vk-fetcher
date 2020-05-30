@@ -1,10 +1,12 @@
 import {cpus} from 'os'
 import {Command, flags} from '@oclif/command'
-import {VKApi} from "node-vk-sdk";
-import {getVkApiInstance} from "./getVkApiInstance";
-import {resolveScreenName} from "./resolveScreenName";
-import {getWallPostsWithDocuments} from "./getWallPostsWithDocuments";
-import {WallWallpostFull} from "node-vk-sdk/distr/src/generated/Models";
+import {VKApi} from "node-vk-sdk"
+import {WallWallpostFull} from "node-vk-sdk/distr/src/generated/Models"
+
+import {getVkApiInstance} from "./getVkApiInstance"
+import {resolveScreenName} from "./resolveScreenName"
+import {getWallPostsWithDocuments} from "./getWallPostsWithDocuments"
+import {extractDocumentsFromPosts, DocumentToDownload} from "./extractDocumentsFromPosts"
 
 class VkFetcher extends Command {
   static description = 'Fetches and saves to disk all of the vk group documents'
@@ -46,7 +48,7 @@ class VkFetcher extends Command {
     let threads = parseInt(flags.threads)
     let group_id: number
     let posts: Array<WallWallpostFull>
-
+    let documents: Array<DocumentToDownload>
 
     this.log('Creating VKApi instance...')
     api = getVkApiInstance(flags.token)
@@ -69,6 +71,15 @@ class VkFetcher extends Command {
       this.error(error, {exit: 2})
     }
     this.log(`... got it: ${posts.length}!\n`)
+
+    this.log('Extracting documents from wall posts...')
+    try {
+      documents = extractDocumentsFromPosts(posts)
+    }
+    catch (error) {
+      this.error(error, {exit: 2})
+    }
+    this.log(`... extracted it: ${documents.length}!\n`)
   }
 }
 
