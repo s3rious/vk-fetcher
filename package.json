@@ -1,0 +1,48 @@
+{
+  "name": "vk-fetcher",
+  "version": "1.0.0",
+  "author": "s3rious a.k.a Leonid Semenov @s3rious",
+  "bin": {
+    "vk-fetcher": "./bin/run"
+  },
+  "bugs": "https://github.com/s3rious/vk-fetcher/issues",
+  "dependencies": {
+    "@oclif/command": "^1.6.1",
+    "@oclif/config": "^1.15.1",
+    "@oclif/plugin-help": "^3.0.1",
+    "tslib": "^1.13.0"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1.22.2",
+    "@types/node": "^10.17.24",
+    "eslint": "^5.16.0",
+    "eslint-config-oclif": "^3.1.0",
+    "eslint-config-oclif-typescript": "^0.1.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.3"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib"
+  ],
+  "homepage": "https://github.com/s3rious/vk-fetcher",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "oclif": {
+    "bin": "vk-fetcher"
+  },
+  "repository": "s3rious/vk-fetcher",
+  "scripts": {
+    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
+    "test": "echo NO TESTS",
+    "version": "oclif-dev readme && git add README.md"
+  },
+  "types": "lib/index.d.ts"
+}
