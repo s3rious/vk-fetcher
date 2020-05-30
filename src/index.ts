@@ -3,6 +3,8 @@ import {Command, flags} from '@oclif/command'
 import {VKApi} from "node-vk-sdk";
 import {getVkApiInstance} from "./getVkApiInstance";
 import {resolveScreenName} from "./resolveScreenName";
+import {getWallPostsWithDocuments} from "./getWallPostsWithDocuments";
+import {WallWallpostFull} from "node-vk-sdk/distr/src/generated/Models";
 
 class VkFetcher extends Command {
   static description = 'Fetches and saves to disk all of the vk group documents'
@@ -31,7 +33,6 @@ class VkFetcher extends Command {
 
   async run() {
     const {flags} = this.parse(VkFetcher)
-    const threads = parseInt(flags.threads)
 
     if (!flags.token) {
       this.error(new Error('No token specified'), {exit: 2})
@@ -42,12 +43,14 @@ class VkFetcher extends Command {
     }
 
     let api: VKApi
+    let threads = parseInt(flags.threads)
     let group_id: number
+    let posts: Array<WallWallpostFull>
 
 
     this.log('Creating VKApi instance...')
     api = getVkApiInstance(flags.token)
-    this.log('... created!')
+    this.log('... created!\n')
 
     this.log(`Resolving group screen name for "${flags.group}"...`)
     try {
@@ -56,7 +59,16 @@ class VkFetcher extends Command {
     catch (error) {
       this.error(error, {exit: 2})
     }
-    this.log(`... resolved: ${group_id}!`)
+    this.log(`... resolved: ${group_id}!\n`)
+
+    this.log('Getting list of wall posts with documents...')
+    try {
+      posts = await getWallPostsWithDocuments(api, group_id)
+    }
+    catch (error) {
+      this.error(error, {exit: 2})
+    }
+    this.log(`... got it: ${posts.length}!\n`)
   }
 }
 
