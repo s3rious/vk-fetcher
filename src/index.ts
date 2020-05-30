@@ -1,3 +1,4 @@
+import {cpus} from 'os'
 import {Command, flags} from '@oclif/command'
 import {VKApi} from "node-vk-sdk";
 import {getVkApiInstance} from "./getVkApiInstance";
@@ -20,10 +21,17 @@ class VkFetcher extends Command {
       char: 'g',
       description: 'vk group. e.g.: lavkasnov_ls'
     }),
+    // flag with a value (-g, --group=VALUE)
+    threads: flags.string({
+      char: 't',
+      description: 'the number of streams with which data will be downloaded from the network, defaults to number of cpu threads',
+      default: String(cpus().length)
+    })
   }
 
   async run() {
     const {flags} = this.parse(VkFetcher)
+    const threads = parseInt(flags.threads)
 
     if (!flags.token) {
       this.error(new Error('No token specified'), {exit: 2})
