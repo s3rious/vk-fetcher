@@ -7,6 +7,7 @@ import {getVkApiInstance} from "./getVkApiInstance"
 import {resolveScreenName} from "./resolveScreenName"
 import {getWallPostsWithDocuments} from "./getWallPostsWithDocuments"
 import {extractDocumentsFromPosts, DocumentToDownload} from "./extractDocumentsFromPosts"
+import {createFolder} from "./createFolder";
 
 class VkFetcher extends Command {
   static description = 'Fetches and saves to disk all of the vk group documents'
@@ -44,8 +45,10 @@ class VkFetcher extends Command {
       this.error(new Error('No group specified'), {exit: 2})
     }
 
-    let api: VKApi
     let threads = parseInt(flags.threads)
+    let folder = `./download/${flags.group}`
+    let path
+    let api: VKApi
     let group_id: number
     let posts: Array<WallWallpostFull>
     let documents: Array<DocumentToDownload>
@@ -80,6 +83,15 @@ class VkFetcher extends Command {
       this.error(error, {exit: 2})
     }
     this.log(`... extracted it: ${documents.length}!\n`)
+
+    this.log(`Creating a folder "${folder}" where filed will be downloaded to...`)
+    try {
+      path = await createFolder(folder)
+    }
+    catch (error) {
+      this.error(error, {exit: 2})
+    }
+    this.log(`... done!\n`)
   }
 }
 
