@@ -8,6 +8,7 @@ import {resolveScreenName} from "./resolveScreenName"
 import {getWallPostsWithDocuments} from "./getWallPostsWithDocuments"
 import {extractDocumentsFromPosts, DocumentToDownload} from "./extractDocumentsFromPosts"
 import {createFolder} from "./createFolder";
+import {downloadDocuments} from "./downloadDocuments";
 
 class VkFetcher extends Command {
   static description = 'Fetches and saves to disk all of the vk group documents'
@@ -92,6 +93,15 @@ class VkFetcher extends Command {
       this.error(error, {exit: 2})
     }
     this.log(`... done!\n`)
+
+    this.log('Downloading documents...')
+    try {
+      await downloadDocuments(documents, path, this.log, threads)
+    }
+    catch (error) {
+      this.error(error, {exit: 2})
+    }
+    this.log(`... done!`)
   }
 }
 
